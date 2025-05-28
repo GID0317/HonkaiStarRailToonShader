@@ -64,12 +64,20 @@ float3 ColorBrightnessAdjustment(float3 color, float brightnessAdd, float bright
     return HsvToRgb(hsv);
 }
 
-float3 ColorSaturationAdjustment(float3 color, float ColorSaturation)
+float3 ToonToneCorrection(float3 c, float4 hsvg)
 {
-    float luminance = 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
-    float3 luminanceColor = float3(luminance, luminance, luminance);
-    float3 finalColor = lerp(luminanceColor, color, ColorSaturation);
-    return finalColor;
+    // gamma
+    c = pow(abs(c), hsvg.w);
+    // rgb -> hsv
+    float4 p = (c.b > c.g) ? float4(c.bg, -1.0, 2.0 / 3.0) : float4(c.gb, 0.0, -1.0 / 3.0);
+    float4 q = (p.x > c.r) ? float4(p.xyw, c.r) : float4(c.r, p.yzx);
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    float3 hsv = float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+    // shift
+    hsv = float3(hsv.x + hsvg.x, saturate(hsv.y * hsvg.y), saturate(hsv.z * hsvg.z));
+    // hsv -> rgb
+    return hsv.z - hsv.z * hsv.y + hsv.z * hsv.y * saturate(abs(frac(hsv.x + float3(1.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0);
 }
 
 float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)

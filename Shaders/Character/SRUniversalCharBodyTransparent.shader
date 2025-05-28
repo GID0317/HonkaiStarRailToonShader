@@ -15,7 +15,7 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
         [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _BodyColorMap("Body color map (Default white)", 2D) = "white" { }
         [HDR] _BodyColorMapColor("Body color map color (Default white)", Color) = (1, 1, 1, 1)
-        _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
+        _MainTexHSVG("Color map HSVGs", Vector) = (0, 1, 1, 1)
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
         [Toggle(_BACKFACEUV2_ON)] _UseBackFaceUV2("Use Back Face UV2 (Default NO)", Float) = 0

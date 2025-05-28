@@ -3,7 +3,6 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 #include "../ShaderLibrary/CharShadow.hlsl"
 #include "../ShaderLibrary/CharDepthOnly.hlsl"
@@ -80,7 +79,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
         TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
         TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -373,7 +372,7 @@ void FaceWriteEyeStencilFragment(
         TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
         TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
         TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -429,30 +428,6 @@ void HairFakeTransparentFragment(
     colorTarget.a = alpha;
 }
 
-FragmentOutput SRUniversalCharGBufferFragment(
-    CharCoreVaryings input,
-    FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
-{
-    SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
-
-    float3 color = 0;
-    float alpha = _Alpha;
-
-    DoClipTestToTargetAlphaValue(alpha, _AlphaTestThreshold);
-    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
-
-    InputData inputData;
-    InitializeInputData(input, inputData);
-
-    SurfaceData surfaceData = (SurfaceData)0;
-    surfaceData.albedo = color;
-    surfaceData.alpha = alpha;
-
-    surfaceData.occlusion = 1;
-
-    return SurfaceDataToGbuffer(surfaceData, inputData, float3(0, 0, 0), kLightingInvalid);
-}
-
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)
 {
     return CharShadowVertex(input, _Maps_ST, _SelfShadowDepthBias, _SelfShadowNormalBias);
@@ -470,7 +445,7 @@ void CharacterShadowFragment(
         TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
         TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
         TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -498,7 +473,7 @@ float4 CharacterDepthOnlyFragment(
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -528,7 +503,7 @@ float4 CharacterDepthNormalsFragment(
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -558,7 +533,7 @@ half4 CharacterMotionVectorsFragment(
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    baseColor = ToonToneCorrection(baseColor, _MainTexHSVG);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 

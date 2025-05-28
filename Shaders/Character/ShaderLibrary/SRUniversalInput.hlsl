@@ -74,8 +74,8 @@ float _SelfShadowDepthBias;
 float _SelfShadowNormalBias;
 
 
-// ColorSaturation
-float _ColorSaturation;
+// Color Grading(MainTex)
+float4 _MainTexHSVG;
 
 // FaceTintColor
 float4 _FrontFaceTintColor;
